@@ -43,4 +43,15 @@ export default defineManifest({
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png",
   },
+
+  // commands: {
+  //   toggle_side_panel: {
+  //     suggested_key: {
+  //       default: "Ctrl+Shift+Q",
+  //       mac: "Command+Shift+Q",
+  //     },
+
+  //     description: "メモを開く",
+  //   },
+  // },
 });

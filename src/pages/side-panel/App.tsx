@@ -1,41 +1,63 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useState, useEffect, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { loadMemoText, saveMemoText } from "@/src/shared/storage/memoText";
 
 import { toast } from "sonner";
 
-// TODO: パネルを閉じると初期化するからストレージで保持したい
-// ショートカット案 ctr + alt + m ⇒ 設定ページでカスタマイズできるのが理想
-
 const App = () => {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [text, setText] = useState("");
 
-  const handleClear = useCallback(() => {
-    if (textareaRef.current) {
-      textareaRef.current.value = "";
-    }
-  }, [textareaRef]);
+  // 初回復元
+  useEffect(() => {
+    const init = async () => {
+      const memoText = await loadMemoText();
+      setText(memoText);
+    };
+    init();
+  }, []);
+
+  // 自動保存
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      saveMemoText(text);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [text]);
+
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLTextAreaElement>) => {
+      setText(e.target.value);
+    },
+    [setText],
+  );
 
   const handleCopy = useCallback(() => {
-    if (textareaRef.current) {
-      const text = textareaRef.current.value;
-      if (text) {
-        navigator.clipboard.writeText(text).then(() => {
-          toast("コピーしました", { position: "top-right", duration: 1000 });
-        });
-      }
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        toast("コピーしました", { duration: 1000 });
+      });
     }
-  }, [textareaRef]);
+  }, [text]);
 
   return (
-    <div className="grid h-screen grid-rows-[1fr_max-content] gap-4 p-4">
-      <Textarea ref={textareaRef} className="resize-none" />
+    <div className="grid h-screen grid-rows-[max-content_1fr] gap-4 p-4">
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" onClick={handleClear}>
+        <Button
+          variant="outline"
+          disabled={text === ""}
+          onClick={() => setText("")}
+        >
           クリア
         </Button>
-        <Button onClick={handleCopy}>コピー</Button>
+        <Button onClick={handleCopy} disabled={text === ""}>
+          コピー
+        </Button>
       </div>
+      <Textarea value={text} className="resize-none" onChange={handleChange} />
     </div>
   );
 };
