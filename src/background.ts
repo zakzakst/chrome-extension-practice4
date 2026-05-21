@@ -1,1 +1,5 @@
-console.log("Background Script Loaded");
+chrome.sidePanel
+  .setPanelBehavior({
+    openPanelOnActionClick: true,
+  })
+  .catch(console.error);

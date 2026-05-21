@@ -1,7 +1,21 @@
 const App = () => {
   return (
     <div className="p-4">
-      <h1>オプションページ</h1>
+      <div>
+        <h1>設定</h1>
+
+        <button
+          onClick={async () => {
+            await chrome.storage.local.set({
+              username: "yamada",
+            });
+
+            alert("saved");
+          }}
+        >
+          Save
+        </button>
+      </div>
     </div>
   );
 };
