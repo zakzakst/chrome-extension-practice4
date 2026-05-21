@@ -3,13 +3,7 @@ import path from "node:path";
 import { ZipArchive } from "archiver";
 
 const SOURCE_DIR = "dist";
-const TEMP_DIR = "downloads/chrome-extension";
-const ZIP_NAME = "downloads/chrome-extension.zip";
-
-// dist → コピー
-fs.cpSync(SOURCE_DIR, TEMP_DIR, {
-  recursive: true,
-});
+const ZIP_NAME = "downloads/chrome-extension-chrome-memo.zip";
 
 // zip作成
 const output = fs.createWriteStream(ZIP_NAME);
@@ -20,19 +14,13 @@ const archive = new ZipArchive("zip", {
 
 archive.pipe(output);
 
-archive.directory(TEMP_DIR, false);
+archive.directory(SOURCE_DIR, false);
 
 await archive.finalize();
 
 // zip完了待機
 await new Promise((resolve) => {
   output.on("close", resolve);
-});
-
-// コピーしたフォルダ削除
-fs.rmSync(TEMP_DIR, {
-  recursive: true,
-  force: true,
 });
 
 console.log("Package Complete!");

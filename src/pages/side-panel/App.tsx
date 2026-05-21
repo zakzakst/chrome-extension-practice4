@@ -5,6 +5,9 @@ import { loadMemoText, saveMemoText } from "@/src/shared/storage/memoText";
 
 import { toast } from "sonner";
 
+// TODO:
+// - 音声入力。モードをショートカットで切り替えることができる
+
 const App = () => {
   const [text, setText] = useState("");
 
