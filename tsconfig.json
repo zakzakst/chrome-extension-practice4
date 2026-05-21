@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "types": ["chrome"]
+    "types": ["chrome"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "files": [],
   "references": [
