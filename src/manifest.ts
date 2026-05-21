@@ -9,7 +9,7 @@ export default defineManifest({
   // permissions: ["bookmarks", "tabs", "tabGroups", "storage"],
 
   action: {
-    default_popup: "index.html",
+    default_popup: "src/pages/popup/index.html",
     default_icon: {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
@@ -36,7 +36,7 @@ export default defineManifest({
   ],
 
   options_ui: {
-    page: "options.html",
+    page: "src/pages/options/index.html",
     open_in_tab: true,
   },
 });
