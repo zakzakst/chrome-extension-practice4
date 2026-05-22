@@ -8,22 +8,22 @@ export default defineManifest({
 
   permissions: ["storage", "sidePanel"],
 
-  action: {
-    // default_popup: "src/pages/popup/index.html",
-    default_icon: {
-      "16": "icons/icon-16.png",
-      "32": "icons/icon-32.png",
-    },
-  },
+  // action: {
+  //   default_popup: "src/pages/popup/index.html",
+  //   default_icon: {
+  //     "16": "icons/icon-16.png",
+  //     "32": "icons/icon-32.png",
+  //   },
+  // },
 
   side_panel: {
     default_path: "src/pages/side-panel/index.html",
   },
 
-  // options_ui: {
-  //   page: "src/pages/options/index.html",
-  //   open_in_tab: true,
-  // },
+  options_ui: {
+    page: "src/pages/options/index.html",
+    open_in_tab: true,
+  },
 
   background: {
     service_worker: "src/background.ts",
