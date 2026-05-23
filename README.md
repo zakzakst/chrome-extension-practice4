@@ -11,6 +11,7 @@
 - 設定ページ
 - iconの動的変更
 - eslint, prettierのignore設定
+- storageに保存しているデータにJSON.stringifyを利用する時の型の指定方法のセオリー調べる
 
 ## アイデア
 

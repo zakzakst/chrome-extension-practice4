@@ -1,4 +1,10 @@
-import { type ChangeEvent, useCallback, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +23,12 @@ import { toast } from "sonner";
 // TODO:
 // - 音声入力。モードをショートカットで切り替えることができる
 //   - https://zenn.dev/hayato94087/articles/25d1912377e5bf
-// - 選択箇所のマークダウン変換
-
-// TODO: 次やる
-// - テンプレート登録とその挿入
 
 const App = () => {
   const [text, setText] = useState("");
   const [textSize, setTextSize] = useState("");
   const [templates, setTemplates] = useState<Template[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 初回メモ情報反映
   useEffect(() => {
@@ -80,6 +83,18 @@ const App = () => {
     }
   }, [text]);
 
+  const handleInsertTemplate = useCallback(
+    (template: Template) => {
+      if (!textareaRef.current) return;
+      const startPos = textareaRef.current.selectionStart;
+      const endPos = textareaRef.current.selectionEnd;
+      const newText =
+        text.slice(0, startPos) + template.text + text.slice(endPos);
+      setText(newText);
+    },
+    [textareaRef, text, setText],
+  );
+
   return (
     <div className="grid h-screen grid-rows-[max-content_1fr] gap-4 p-4">
       <div className="grid grid-cols-2 gap-2">
@@ -100,6 +115,7 @@ const App = () => {
             value={text}
             className={cn("resize-none", `text-${textSize}`)}
             onChange={handleChange}
+            ref={textareaRef}
           />
         </ContextMenuTrigger>
         <ContextMenuContent>
@@ -108,7 +124,10 @@ const App = () => {
           )}
           {!!templates.length &&
             templates.map((template) => (
-              <ContextMenuItem key={template.name}>
+              <ContextMenuItem
+                key={template.name}
+                onClick={() => handleInsertTemplate(template)}
+              >
                 {template.name}
               </ContextMenuItem>
             ))}
