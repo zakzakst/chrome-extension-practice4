@@ -1,10 +1,17 @@
-import { useCallback, useState, useEffect, type ChangeEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { loadMemoText, saveMemoText } from "@/src/shared/storage/memoText";
-import { loadTextSize } from "@/src/shared/storage/textSize";
-import { cn } from "@/lib/utils";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { loadMemoText, saveMemoText } from "@/src/shared/storage/memoText";
+import { type Template, loadTemplates } from "@/src/shared/storage/templates";
+import { loadTextSize } from "@/src/shared/storage/textSize";
 import { toast } from "sonner";
 
 // TODO:
@@ -18,6 +25,7 @@ import { toast } from "sonner";
 const App = () => {
   const [text, setText] = useState("");
   const [textSize, setTextSize] = useState("");
+  const [templates, setTemplates] = useState<Template[]>([]);
 
   // 初回メモ情報反映
   useEffect(() => {
@@ -26,7 +34,7 @@ const App = () => {
       setText(memoText);
     };
     init();
-  }, []);
+  }, [setText]);
 
   // テキストサイズ反映
   useEffect(() => {
@@ -35,7 +43,16 @@ const App = () => {
       setTextSize(textSize || "sm");
     };
     init();
-  });
+  }, [setTextSize]);
+
+  // テンプレート情報反映
+  useEffect(() => {
+    const init = async () => {
+      const templates = await loadTemplates();
+      setTemplates(templates);
+    };
+    init();
+  }, [setTemplates]);
 
   // 自動保存
   useEffect(() => {
@@ -77,11 +94,26 @@ const App = () => {
           コピー
         </Button>
       </div>
-      <Textarea
-        value={text}
-        className={cn("resize-none", `text-${textSize}`)}
-        onChange={handleChange}
-      />
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <Textarea
+            value={text}
+            className={cn("resize-none", `text-${textSize}`)}
+            onChange={handleChange}
+          />
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          {!templates.length && (
+            <ContextMenuItem disabled>登録テンプレートなし</ContextMenuItem>
+          )}
+          {!!templates.length &&
+            templates.map((template) => (
+              <ContextMenuItem key={template.name}>
+                {template.name}
+              </ContextMenuItem>
+            ))}
+        </ContextMenuContent>
+      </ContextMenu>
     </div>
   );
 };

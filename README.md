@@ -10,7 +10,7 @@
 
 - 設定ページ
 - iconの動的変更
-- import order効いてないっぽい。要確認・修正
+- eslint, prettierのignore設定
 
 ## アイデア
 
@@ -24,3 +24,8 @@
   - ローカルフォルダ／ファイルを読みに行ければ便利そう
 - 特定のキー操作をすると起動する設定（下記の `chrome上でaを2回押した時` のイメージ）
   - https://zenn.dev/monjara/articles/3b200fa041fbdf
+
+## 済
+
+- import order効いてないっぽい。要確認・修正
+  - VS Code保存時は効いていないがnpm run lint:prettierではちゃんと効いた

@@ -1,5 +1,5 @@
-import { saveTextSize, loadTextSize } from "@/src/shared/storage/textSize";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -8,7 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { loadTextSize, saveTextSize } from "@/src/shared/storage/textSize";
+import { saveTemplates } from "@/src/shared/storage/templates";
 import { toast } from "sonner";
 
 type TextSizeItem = {
@@ -52,6 +53,12 @@ const App = () => {
 
   const handleSave = useCallback(async () => {
     await saveTextSize(textSize);
+    await saveTemplates([
+      {
+        name: "test",
+        text: "## test text",
+      },
+    ]);
     toast("設定を保存しました", { duration: 1000 });
   }, [textSize]);
 
