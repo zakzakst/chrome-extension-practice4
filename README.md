@@ -10,6 +10,7 @@
 
 - 設定ページ
 - iconの動的変更
+- eslint, prettierのignore設定
 
 ## アイデア
 
