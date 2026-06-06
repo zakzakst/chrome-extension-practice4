@@ -51,7 +51,7 @@ export default defineManifest({
         mac: "Command+Shift+Q",
       },
 
-      description: "メモを開く",
+      description: "メモを開閉する",
     },
   },
 });

@@ -1,5 +1,6 @@
 import {
   type ChangeEvent,
+  type WheelEvent,
   useCallback,
   useEffect,
   useState,
@@ -17,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { loadMemoText, saveMemoText } from "@/src/shared/storage/memoText";
 import { type Template, loadTemplates } from "@/src/shared/storage/templates";
-import { loadTextSize } from "@/src/shared/storage/textSize";
+import { loadTextSize, saveTextSize } from "@/src/shared/storage/textSize";
 import { toast } from "sonner";
 
 // TODO:
@@ -95,6 +96,41 @@ const App = () => {
     [textareaRef, text, setText],
   );
 
+  const handleWheel = useCallback(
+    async (e: WheelEvent<HTMLTextAreaElement>) => {
+      if (!e.shiftKey) return;
+
+      if (e.deltaY < 0) {
+        switch (textSize) {
+          case "xs":
+            await saveTextSize("sm");
+            setTextSize("sm");
+            break;
+          case "sm":
+            await saveTextSize("base");
+            setTextSize("base");
+            break;
+          default:
+            break;
+        }
+      } else {
+        switch (textSize) {
+          case "sm":
+            await saveTextSize("xs");
+            setTextSize("xs");
+            break;
+          case "base":
+            await saveTextSize("sm");
+            setTextSize("sm");
+            break;
+          default:
+            break;
+        }
+      }
+    },
+    [textSize, setTextSize],
+  );
+
   return (
     <div className="grid h-screen grid-rows-[max-content_1fr] gap-4 p-4">
       <div className="grid grid-cols-2 gap-2">
@@ -115,6 +151,7 @@ const App = () => {
             value={text}
             className={cn("resize-none", `text-${textSize}`)}
             onChange={handleChange}
+            onWheel={handleWheel}
             ref={textareaRef}
           />
         </ContextMenuTrigger>
