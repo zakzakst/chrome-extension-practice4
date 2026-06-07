@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +34,7 @@ import {
 } from "@/src/shared/storage/templates";
 import { loadTextSize, saveTextSize } from "@/src/shared/storage/textSize";
 import { toast } from "sonner";
+import Papa from "papaparse";
 
 type TextSizeItem = {
   value: string;
@@ -48,6 +55,11 @@ const TextSizeItems: TextSizeItem[] = [
     label: "base",
   },
 ];
+
+const escapeCsvValue = (value: unknown) => {
+  const str = String(value ?? "");
+  return `"${str.replace(/"/g, '""')}"`;
+};
 
 const App = () => {
   const [textSize, setTextSize] = useState("");
@@ -81,9 +93,9 @@ const App = () => {
   );
 
   const handleDeleteTemplate = useCallback(
-    (name: string) => {
+    (index: number) => {
       const newTemplates = templates.filter(
-        (template) => template.name !== name,
+        (_, templateIndex) => templateIndex !== index,
       );
       setTemplates(newTemplates);
     },
@@ -111,6 +123,68 @@ const App = () => {
     await saveTemplates(templates);
     toast("設定を保存しました", { duration: 1000 });
   }, [templates, textSize]);
+
+  const handleDownloadCsv = useCallback(() => {
+    const headers = ["name", "text"];
+    const csv = [
+      headers.join(","),
+      ...templates.map((template) =>
+        headers
+          .map((header) =>
+            escapeCsvValue(template[header as keyof typeof template]),
+          )
+          .join(","),
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "templates.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [templates]);
+
+  const handleLoadCsv = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      // const reader = new FileReader();
+      // reader.onload = () => {
+      //   const csvText = reader.result as string;
+
+      //   const rows = csvText
+      //     .trim()
+      //     .split("\n")
+      //     .map((row) => row.split(","));
+
+      //   const headers = rows[0];
+
+      //   const data = rows
+      //     .slice(1)
+      //     .map((row) =>
+      //       Object.fromEntries(
+      //         headers.map((header, index) => [header, row[index]]),
+      //       ),
+      //     );
+      //   console.log(data);
+      // };
+      // reader.readAsText(file);
+
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => {
+          // TODO: CSVデータのバリデーション
+          // console.log(results.data);
+          setTemplates((value) => [...value, ...(results.data as Template[])]);
+          // TODO: inputファイルデータのクリア
+        },
+      });
+    },
+    [setTemplates],
+  );
 
   return (
     <div className="p-4">
@@ -144,12 +218,12 @@ const App = () => {
               )}
               {!!templates.length && (
                 <ul className="list-disc">
-                  {templates.map((template) => (
-                    <li key={template.name} className="flex items-center gap-2">
+                  {templates.map((template, index) => (
+                    <li key={index} className="flex items-center gap-2">
                       <span>{template.name}</span>
                       <Button
                         size="xs"
-                        onClick={() => handleDeleteTemplate(template.name)}
+                        onClick={() => handleDeleteTemplate(index)}
                       >
                         X
                       </Button>
@@ -193,6 +267,28 @@ const App = () => {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-[100px_1fr] gap-2">
+            <div />
+            <div>
+              <Button onClick={handleDownloadCsv}>
+                テンプレートデータをCSVでダウンロード
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-[100px_1fr] gap-2">
+            <div />
+            <div>
+              <div>
+                <Input type="file" accept=".csv" onChange={handleLoadCsv} />
               </div>
             </div>
           </div>
