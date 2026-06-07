@@ -1,9 +1,12 @@
+import { z } from "zod";
 const STORAGE_KEY = "chrome-memo-templates";
 
-export type Template = {
-  name: string;
-  text: string;
-};
+export const TemplateSchema = z.object({
+  name: z.string(),
+  text: z.string(),
+});
+
+export type Template = z.infer<typeof TemplateSchema>;
 
 export const saveTemplates = async (templates: Template[]) => {
   await chrome.storage.local.set({

@@ -29,6 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   type Template,
+  TemplateSchema,
   loadTemplates,
   saveTemplates,
 } from "@/src/shared/storage/templates";
@@ -176,10 +177,12 @@ const App = () => {
       Papa.parse(file, {
         header: true,
         complete: (results) => {
-          // TODO: CSVデータのバリデーション
-          // console.log(results.data);
-          setTemplates((value) => [...value, ...(results.data as Template[])]);
-          // TODO: inputファイルデータのクリア
+          const templates = results.data.map((row) =>
+            TemplateSchema.parse(row),
+          );
+          setTemplates((value) => [...value, ...(templates as Template[])]);
+          // inputファイルデータのクリア
+          event.target.value = "";
         },
       });
     },
@@ -216,6 +219,7 @@ const App = () => {
               {!templates.length && (
                 <div>登録されたテンプレートはありません</div>
               )}
+              {/* TODO: 編集機能、テンプレート内容確認、並び順変更、デザイン修正 */}
               {!!templates.length && (
                 <ul className="list-disc">
                   {templates.map((template, index) => (
@@ -288,6 +292,7 @@ const App = () => {
             <div />
             <div>
               <div>
+                {/* TODO: Inputファイルの表示変更 */}
                 <Input type="file" accept=".csv" onChange={handleLoadCsv} />
               </div>
             </div>
