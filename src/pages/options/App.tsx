@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 
+import { TemplateList } from "@/components/features/options/TemplateList";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,8 +35,8 @@ import {
   saveTemplates,
 } from "@/src/shared/storage/templates";
 import { loadTextSize, saveTextSize } from "@/src/shared/storage/textSize";
-import { toast } from "sonner";
 import Papa from "papaparse";
+import { toast } from "sonner";
 
 type TextSizeItem = {
   value: string;
@@ -93,10 +94,15 @@ const App = () => {
     [setTextSize],
   );
 
+  const handleEditTemplate = useCallback((targetTemplate: Template) => {
+    // テンプレート編集ダイアログ表示
+    console.log(targetTemplate);
+  }, []);
+
   const handleDeleteTemplate = useCallback(
-    (index: number) => {
+    (targetTemplate: Template) => {
       const newTemplates = templates.filter(
-        (_, templateIndex) => templateIndex !== index,
+        (template) => template !== targetTemplate,
       );
       setTemplates(newTemplates);
     },
@@ -219,22 +225,11 @@ const App = () => {
               {!templates.length && (
                 <div>登録されたテンプレートはありません</div>
               )}
-              {/* TODO: 編集機能、テンプレート内容確認、並び順変更、デザイン修正 */}
-              {!!templates.length && (
-                <ul className="list-disc">
-                  {templates.map((template, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <span>{template.name}</span>
-                      <Button
-                        size="xs"
-                        onClick={() => handleDeleteTemplate(index)}
-                      >
-                        X
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <TemplateList
+                templates={templates}
+                onEdit={handleEditTemplate}
+                onDelete={handleDeleteTemplate}
+              />
               <div className="mt-2">
                 <Dialog>
                   <DialogTrigger asChild>

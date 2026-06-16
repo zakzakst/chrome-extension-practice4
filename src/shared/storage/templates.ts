@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 const STORAGE_KEY = "chrome-memo-templates";
 
 export const TemplateSchema = z.object({
