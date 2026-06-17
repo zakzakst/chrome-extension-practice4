@@ -2,23 +2,27 @@ import {
   type ChangeEvent,
   useCallback,
   useEffect,
-  useRef,
+  // useRef,
   useState,
 } from "react";
 
+import {
+  TemplateDialog,
+  type TemplateDialogType,
+} from "@/components/features/options/TemplateDialog";
 import { TemplateList } from "@/components/features/options/TemplateList";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
+// import {
+//   Dialog,
+//   DialogClose,
+//   DialogContent,
+//   DialogDescription,
+//   DialogFooter,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog";
+// import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -27,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+// import { Textarea } from "@/components/ui/textarea";
 import {
   type Template,
   TemplateSchema,
@@ -66,8 +70,13 @@ const escapeCsvValue = (value: unknown) => {
 const App = () => {
   const [textSize, setTextSize] = useState("");
   const [templates, setTemplates] = useState<Template[]>([]);
-  const templateNameRef = useRef<HTMLInputElement>(null);
-  const templateTextRef = useRef<HTMLTextAreaElement>(null);
+  const [openTemplateDialog, setOpenTemplateDialog] = useState<boolean>(false);
+  const [templateDialogTarget, setTemplateDialogTarget] =
+    useState<Template | null>(null);
+  const [templateDialogType, setTemplateDialogType] =
+    useState<TemplateDialogType | null>(null);
+  // const templateNameRef = useRef<HTMLInputElement>(null);
+  // const templateTextRef = useRef<HTMLTextAreaElement>(null);
 
   // テキストサイズ反映
   useEffect(() => {
@@ -94,10 +103,22 @@ const App = () => {
     [setTextSize],
   );
 
-  const handleEditTemplate = useCallback((targetTemplate: Template) => {
+  const handleCreateTemplate = useCallback(() => {
     // テンプレート編集ダイアログ表示
-    console.log(targetTemplate);
-  }, []);
+    setTemplateDialogTarget(null);
+    setTemplateDialogType("create");
+    setOpenTemplateDialog(true);
+  }, [setTemplateDialogTarget, setTemplateDialogType, setOpenTemplateDialog]);
+
+  const handleEditTemplate = useCallback(
+    (targetTemplate: Template) => {
+      // テンプレート編集ダイアログ表示
+      setTemplateDialogTarget(targetTemplate);
+      setTemplateDialogType("edit");
+      setOpenTemplateDialog(true);
+    },
+    [setTemplateDialogTarget, setTemplateDialogType, setOpenTemplateDialog],
+  );
 
   const handleDeleteTemplate = useCallback(
     (targetTemplate: Template) => {
@@ -109,21 +130,52 @@ const App = () => {
     [templates, setTemplates],
   );
 
-  const handleAddTemplate = useCallback(() => {
-    const nameEl = templateNameRef.current;
-    const textEl = templateTextRef.current;
-    if (!nameEl || !textEl) return;
+  // const handleAddTemplate = useCallback(() => {
+  //   const nameEl = templateNameRef.current;
+  //   const textEl = templateTextRef.current;
+  //   if (!nameEl || !textEl) return;
 
-    if (nameEl.value && textEl.value) {
-      setTemplates((current) => [
-        ...current,
-        { name: nameEl.value, text: textEl.value },
-      ]);
-      nameEl.value = "";
-      textEl.value = "";
-      toast("テンプレートを追加しました", { duration: 1000 });
-    }
-  }, [setTemplates, templateNameRef, templateTextRef]);
+  //   if (nameEl.value && textEl.value) {
+  //     setTemplates((current) => [
+  //       ...current,
+  //       { name: nameEl.value, text: textEl.value },
+  //     ]);
+  //     nameEl.value = "";
+  //     textEl.value = "";
+  //     toast("テンプレートを追加しました", { duration: 1000 });
+  //   }
+  // }, [setTemplates, templateNameRef, templateTextRef]);
+
+  const closeTemplateDialog = useCallback(() => {
+    setOpenTemplateDialog(false);
+    setTemplateDialogTarget(null);
+    setTemplateDialogType(null);
+  }, [setOpenTemplateDialog, setTemplateDialogTarget, setTemplateDialogType]);
+
+  const handleTemplateDialogSubmit = useCallback(
+    (newTemplate: Template) => {
+      if (templateDialogType === "create") {
+        setTemplates((current) => [...current, newTemplate]);
+      } else if (templateDialogType === "edit") {
+        const newTemplates = templates.map((template) => {
+          if (template === templateDialogTarget) {
+            return newTemplate;
+          } else {
+            return template;
+          }
+        });
+        setTemplates(newTemplates);
+      }
+      closeTemplateDialog();
+    },
+    [
+      templates,
+      templateDialogTarget,
+      templateDialogType,
+      setTemplates,
+      closeTemplateDialog,
+    ],
+  );
 
   const handleSave = useCallback(async () => {
     await saveTextSize(textSize);
@@ -196,42 +248,46 @@ const App = () => {
   );
 
   return (
-    <div className="p-4">
-      <div className="max-w-2xl">
-        <h1 className="text-2xl font-bold">設定ページ</h1>
+    <>
+      <div className="p-4">
+        <div className="max-w-2xl">
+          <h1 className="text-2xl font-bold">設定ページ</h1>
 
-        <div className="mt-6 grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-[100px_1fr] gap-2">
-            <div>テキストサイズ</div>
-            <Select value={textSize} onValueChange={handleChangeTextSize}>
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="テキストサイズを選択してください" />
-              </SelectTrigger>
-              <SelectContent>
-                {TextSizeItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="mt-6 grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-[100px_1fr] gap-2">
+              <div>テキストサイズ</div>
+              <Select value={textSize} onValueChange={handleChangeTextSize}>
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="テキストサイズを選択してください" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TextSizeItems.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-[100px_1fr] gap-2">
-            <div>テンプレート</div>
-            <div>
-              {!templates.length && (
-                <div>登録されたテンプレートはありません</div>
-              )}
-              <TemplateList
-                templates={templates}
-                onEdit={handleEditTemplate}
-                onDelete={handleDeleteTemplate}
-              />
-              <div className="mt-2">
-                <Dialog>
+          <div className="mt-6 grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-[100px_1fr] gap-2">
+              <div>テンプレート</div>
+              <div>
+                {/* {!templates.length && (
+                  <div>登録されたテンプレートはありません</div>
+                )} */}
+                <TemplateList
+                  templates={templates}
+                  onEdit={handleEditTemplate}
+                  onDelete={handleDeleteTemplate}
+                />
+                <div className="mt-2">
+                  <Button onClick={handleCreateTemplate}>
+                    新規テンプレート作成
+                  </Button>
+                  {/* <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline">テンプレートを追加する</Button>
                   </DialogTrigger>
@@ -265,40 +321,48 @@ const App = () => {
                       </div>
                     </DialogFooter>
                   </DialogContent>
-                </Dialog>
+                </Dialog> */}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-[100px_1fr] gap-2">
-            <div />
-            <div>
-              <Button onClick={handleDownloadCsv}>
-                テンプレートデータをCSVでダウンロード
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-[100px_1fr] gap-2">
-            <div />
-            <div>
+          <div className="mt-6 grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-[100px_1fr] gap-2">
+              <div />
               <div>
-                {/* TODO: Inputファイルの表示変更 */}
-                <Input type="file" accept=".csv" onChange={handleLoadCsv} />
+                <Button onClick={handleDownloadCsv}>
+                  テンプレートデータをCSVでダウンロード
+                </Button>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6">
-          <Button onClick={handleSave}>設定を保存</Button>
+          <div className="mt-6 grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-[100px_1fr] gap-2">
+              <div />
+              <div>
+                <div>
+                  {/* TODO: Inputファイルの表示変更 */}
+                  <Input type="file" accept=".csv" onChange={handleLoadCsv} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Button onClick={handleSave}>設定を保存</Button>
+          </div>
         </div>
       </div>
-    </div>
+      <TemplateDialog
+        template={templateDialogTarget}
+        type={templateDialogType}
+        open={openTemplateDialog}
+        onSubmit={handleTemplateDialogSubmit}
+        onClose={closeTemplateDialog}
+      />
+    </>
   );
 };
 
