@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -66,13 +67,20 @@ export const TemplateDialog = ({
   }, [templateNameRef, templateTextRef, onSubmit]);
 
   return (
-    <Dialog open={open}>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{titleText}</DialogTitle>
           <DialogDescription>フォームを入力してください</DialogDescription>
         </DialogHeader>
-        <div>
+        <div className="no-scrollbar -mx-4 max-h-[50vh] overflow-y-auto px-4">
           <Field>
             <FieldLabel htmlFor="template-name">テンプレート名</FieldLabel>
             <Input
@@ -92,9 +100,9 @@ export const TemplateDialog = ({
         </div>
         <DialogFooter>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" onClick={onClose}>
-              閉じる
-            </Button>
+            <DialogClose asChild>
+              <Button variant="outline">閉じる</Button>
+            </DialogClose>
             {type === "create" && <Button onClick={handleSubmit}>追加</Button>}
             {type === "edit" && <Button onClick={handleSubmit}>編集</Button>}
           </div>
