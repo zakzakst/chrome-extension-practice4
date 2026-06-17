@@ -15,7 +15,7 @@ const TemplateListItem = ({
   onDelete,
 }: TemplateListItemProps) => {
   return (
-    <li className="grid grid-cols-[1fr_max-content] rounded border p-1">
+    <li className="grid grid-cols-[1fr_max-content] items-center rounded border p-1">
       <div>{template.name}</div>
       <div className="flex items-center gap-1">
         <Button size="icon-sm" onClick={() => onEdit(template)}>
