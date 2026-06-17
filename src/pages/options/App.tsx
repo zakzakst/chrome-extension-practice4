@@ -197,7 +197,7 @@ const App = () => {
 
   return (
     <div className="p-4">
-      <div>
+      <div className="max-w-2xl">
         <h1 className="text-2xl font-bold">設定ページ</h1>
 
         <div className="mt-6 grid grid-cols-1 gap-4">
